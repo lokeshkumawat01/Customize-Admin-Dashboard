@@ -11,15 +11,28 @@ import {
   ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, Legend
 } from 'recharts';
 
-const dummyChartData = [
-  { date: 'Jun 01', orders: 120, revenue: 2200 },
-  { date: 'Jun 02', orders: 90, revenue: 1800 },
-  { date: 'Jun 03', orders: 150, revenue: 2600 },
-  { date: 'Jun 04', orders: 80, revenue: 1700 },
-  { date: 'Jun 05', orders: 200, revenue: 3000 },
-  { date: 'Jun 06', orders: 180, revenue: 2800 },
-  { date: 'Jun 07', orders: 160, revenue: 2500 },
-];
+const chartDataSets = {
+  weekly: [
+    { date: 'Jun 01', orders: 120, revenue: 2200 },
+    { date: 'Jun 02', orders: 90, revenue: 1800 },
+    { date: 'Jun 03', orders: 150, revenue: 2600 },
+    { date: 'Jun 04', orders: 80, revenue: 1700 },
+    { date: 'Jun 05', orders: 200, revenue: 3000 },
+    { date: 'Jun 06', orders: 180, revenue: 2800 },
+    { date: 'Jun 07', orders: 160, revenue: 2500 },
+  ],
+  monthly: [
+    { date: 'May', orders: 3400, revenue: 52000 },
+    { date: 'Jun', orders: 3750, revenue: 56000 },
+    { date: 'Jul', orders: 3900, revenue: 58000 },
+    { date: 'Aug', orders: 4100, revenue: 60000 }
+  ],
+  yearly: [
+    { date: '2022', orders: 40000, revenue: 650000 },
+    { date: '2023', orders: 45000, revenue: 720000 },
+    { date: '2024', orders: 50000, revenue: 790000 }
+  ]
+};
 
 const pieData = {
   weekly: [
@@ -86,13 +99,12 @@ const ProjectCard = ({ title, progress, daysLeft, color }) => (
 
 const DashboardHome = () => {
   const [stats] = useState({ users: 24500, orders: 1250, revenue: 18000, conversion: 4.8 });
-  const [pieRange, setPieRange] = useState('weekly');
+  const [chartRange, setChartRange] = useState('weekly');
 
   return (
     <Box>
       <Typography variant="h5" fontWeight={600} mb={3}>Dashboard Overview</Typography>
 
-      {/* Stat Cards */}
       <Grid container spacing={3} mb={4}>
         <Grid item xs={12} md={3}><StatCard title="Total Users" value={stats.users} icon={<Person />} change="+2.5%" positive color="primary" /></Grid>
         <Grid item xs={12} md={3}><StatCard title="Revenue" value={stats.revenue} icon={<MonetizationOn />} change="+8.1%" positive color="success" /></Grid>
@@ -100,13 +112,18 @@ const DashboardHome = () => {
         <Grid item xs={12} md={3}><StatCard title="Conversion" value={stats.conversion + '%'} icon={<Person />} change="+0.6%" positive color="info" /></Grid>
       </Grid>
 
-      {/* Charts Section */}
+      <ToggleButtonGroup value={chartRange} exclusive onChange={(e, val) => val && setChartRange(val)} sx={{ mb: 2 }}>
+        <ToggleButton value="weekly">Weekly</ToggleButton>
+        <ToggleButton value="monthly">Monthly</ToggleButton>
+        <ToggleButton value="yearly">Yearly</ToggleButton>
+      </ToggleButtonGroup>
+
       <Grid container spacing={3} mb={3}>
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
-            <Typography variant="h6" fontWeight={600} mb={2}>Line Chart - Weekly Sales</Typography>
+            <Typography variant="h6" fontWeight={600} mb={2}>Line Chart - Orders</Typography>
             <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={dummyChartData}>
+              <LineChart data={chartDataSets[chartRange]}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis />
@@ -120,7 +137,7 @@ const DashboardHome = () => {
           <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
             <Typography variant="h6" fontWeight={600} mb={2}>Bar Chart - Revenue</Typography>
             <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={dummyChartData}>
+              <BarChart data={chartDataSets[chartRange]}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis />
@@ -135,18 +152,11 @@ const DashboardHome = () => {
       <Grid container spacing={3} mb={3}>
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-              <Typography variant="h6" fontWeight={600}>Export by Country</Typography>
-              <ToggleButtonGroup value={pieRange} exclusive onChange={(e, val) => val && setPieRange(val)} size="small">
-                <ToggleButton value="weekly">Weekly</ToggleButton>
-                <ToggleButton value="monthly">Monthly</ToggleButton>
-                <ToggleButton value="yearly">Yearly</ToggleButton>
-              </ToggleButtonGroup>
-            </Stack>
+            <Typography variant="h6" fontWeight={600} mb={2}>Export by Country</Typography>
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
-                <Pie data={pieData[pieRange]} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
-                  {pieData[pieRange].map((_, index) => (
+                <Pie data={pieData[chartRange]} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+                  {pieData[chartRange].map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -159,7 +169,7 @@ const DashboardHome = () => {
           <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
             <Typography variant="h6" fontWeight={600} mb={2}>Area Chart - Revenue Trend</Typography>
             <ResponsiveContainer width="100%" height={250}>
-              <AreaChart data={dummyChartData}>
+              <AreaChart data={chartDataSets[chartRange]}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
@@ -177,7 +187,6 @@ const DashboardHome = () => {
         </Grid>
       </Grid>
 
-      {/* Projects Section */}
       <Grid container spacing={3}>
         <Grid item xs={12} md={4}>
           <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
